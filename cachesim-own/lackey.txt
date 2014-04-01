@@ -1,0 +1,51 @@
+// Specific Details about --trace-mem=yes
+// --------------------------------------
+// Lackey's --trace-mem code is a good starting point for building Valgrind
+// tools that act on memory loads and stores.  It also could be used as is,
+// with its output used as input to a post-mortem processing step.  However,
+// because memory traces can be very large, online analysis is generally
+// better.
+//
+// It prints memory data access traces that look like this:
+//
+//   I  0023C790,2  # instruction read at 0x0023C790 of size 2
+//   I  0023C792,5
+//    S BE80199C,4  # data store at 0xBE80199C of size 4
+//   I  0025242B,3
+//    L BE801950,4  # data load at 0xBE801950 of size 4
+//   I  0023D476,7
+//    M 0025747C,1  # data modify at 0x0025747C of size 1
+//   I  0023DC20,2
+//    L 00254962,1
+//    L BE801FB3,1
+//   I  00252305,1
+//    L 00254AEB,1
+//    S 00257998,1
+//
+// Every instruction executed has an "instr" event representing it.
+// Instructions that do memory accesses are followed by one or more "load",
+// "store" or "modify" events.  Some instructions do more than one load or
+// store, as in the last two examples in the above trace.
+//
+// Here are some examples of x86 instructions that do different combinations
+// of loads, stores, and modifies.
+//
+//    Instruction          Memory accesses                  Event sequence
+//    -----------          ---------------                  --------------
+//    add %eax, %ebx       No loads or stores               instr
+//
+//    movl (%eax), %ebx    loads (%eax)                     instr, load
+//
+//    movl %eax, (%ebx)    stores (%ebx)                    instr, store
+//
+//    incl (%ecx)          modifies (%ecx)                  instr, modify
+//
+//    cmpsb                loads (%esi), loads(%edi)        instr, load, load
+//
+//    call*l (%edx)        loads (%edx), stores -4(%esp)    instr, load, store
+//    pushl (%edx)         loads (%edx), stores -4(%esp)    instr, load, store
+//    movsw                loads (%esi), stores (%edi)      instr, load, store
+//
+// Instructions using x86 "rep" prefixes are traced as if they are repeated
+// N times.
+

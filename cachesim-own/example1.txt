@@ -1,0 +1,36 @@
+128 Bytes cache size
+32 Bytes cache line
+direct mapped (= 1-way associative)
+
+32 Bytes cache line -> 5 offset bits
+128 / 32 / 1 = 4 x 1 cache lines in cache -> 2 index bits
+
+assuming 64 bit addresses
+64 - (5 + 2) = 57 tag bits
+
+cache organization looks looks like this:
+        +------+
+ idx 0  | set0 |
+        +------+
+ idx 1  | set0 |
+        +------+
+ idx 2  | set0 |
+        +------+
+ idx 3  | set0 |
+        +------+
+
+
+Example trace (address in binary):
+L 00...0010|01|00101,1 -> miss (idx1)
+L 00...0010|01|00110,1 -> hit (idx1)
+L 00...0010|01|11111,1 -> hit (idx1)
+L 00...0010|10|00000,1 -> miss (idx2)
+L 00...0010|10|00001,1 -> hit (idx2)
+L 00...0011|01|00110,1 -> evict,miss (idx1)
+L 00...0011|01|00111,1 -> hit (idx1)
+L 00...0000|10|10000,1 -> evict,miss (idx2)
+
+50 % hit rate
+50 % miss rate
+cache is 50 % full
+

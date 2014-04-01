@@ -1,0 +1,49 @@
+1024 Bytes cache size
+64 Bytes cache line
+2-way associative
+
+64 Bytes cache line -> 6 offset bits
+1024 / 64 / 2 = 8 x 2 cache lines in cache -> 3 index bits
+
+assuming 64 bit addresses
+64 - (6 + 3) = 55 tag bits
+
+cache organization looks like this:
+       +------+------+
+ idx0  | set0 | set1 |
+       +------+------+
+ idx1  | set0 | set1 |
+       +------+------+
+ idx2  | set0 | set1 |
+       +------+------+
+ idx3  | set0 | set1 |
+       +------+------+
+ idx4  | set0 | set1 |
+       +------+------+
+ idx5  | set0 | set1 |
+       +------+------+
+ idx6  | set0 | set1 |
+       +------+------+
+ idx7  | set0 | set1 |
+       +------+------+
+
+
+Example trace (address in binary):
+
+L 00...0000|100|100101,1 -> miss (idx4, put to set0)
+L 00...0000|100|100110,1 -> hit (idx4, set0)
+L 00...0000|100|111111,1 -> hit (idx4, set0)
+L 00...0000|101|000000,1 -> miss (idx5, put to set0)
+L 00...0000|101|000001,1 -> hit (idx5, set0)
+L 00...0000|110|100110,1 -> miss (idx6, put to set0)
+L 00...0000|110|100111,1 -> hit (idx6, set0)
+L 00...0000|001|010000,1 -> miss (idx1, put to set0)
+L 00...0001|100|100101,1 -> miss (idx4, put to set1)
+L 00...0001|100|100111,1 -> hit (idx4, set1)
+L 00...0010|100|100101,1 -> miss,evict (idx4, choose set to evict)
+L 00...0010|110|100111,1 -> miss (idx6, put to set1)
+L 00...0010|110|100000,1 -> hit (idx6, set1)
+
+46.15 % hit rate
+53.85 % miss rate
+cache is 38 % full
